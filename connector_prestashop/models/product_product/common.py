@@ -24,6 +24,10 @@ class ProductProduct(models.Model):
         digits=dp.get_precision('Product Price')
     )
 
+    image_ids = fields.One2many(
+        inverse=False,
+    )
+
     @api.multi
     def update_prestashop_qty(self):
         for product in self:
@@ -268,6 +272,7 @@ class ProductCombinationAdapter(Component):
     _name = 'prestashop.product.combination.adapter'
     _inherit = 'prestashop.adapter'
     _apply_on = 'prestashop.product.combination'
+
     _prestashop_model = 'combinations'
     _export_node_name = 'combination'
 

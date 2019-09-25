@@ -69,22 +69,26 @@ class PrestashopBinding(models.AbstractModel):
             return exporter.run(self, fields)
 
     @job(default_channel='root.prestashop')
-    def export_delete_record(self, backend, external_id):
+    def export_delete_record(self, binding_model_name, backend, prestashop_id,
+                             record_vals=None):
         """ Delete a record on PrestaShop """
         self.check_active(backend)
-        with backend.work_on(self._name) as work:
+        with backend.work_on(binding_model_name) as work:
             deleter = work.component(usage='record.exporter.deleter')
-            return deleter.run(external_id)
+            return deleter.run(prestashop_id, record_vals)
 
     # TODO: Research
     @api.multi
     def resync(self):
         func = self.import_record
         if self.env.context.get('connector_delay'):
-            func = self.import_record.delay
+            func = self.with_delay().import_record
         for record in self:
             func(record.backend_id, record.prestashop_id)
         return True
+
+    def get_map_record_vals(self):
+        return None
 
 
 class PrestashopBindingOdoo(models.AbstractModel):

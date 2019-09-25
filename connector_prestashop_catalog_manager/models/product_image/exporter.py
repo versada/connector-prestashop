@@ -1,33 +1,22 @@
 # -*- coding: utf-8 -*-
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp.addons.connector.unit.mapper import mapping
-from openerp.addons.connector_prestashop.unit.exporter import \
-    PrestashopExporter
-from openerp.addons.connector_prestashop.unit.mapper import (
-    PrestashopExportMapper
-)
-from openerp.addons.connector_prestashop.unit.backend_adapter import (
+from openerp.addons.connector_prestashop.components.backend_adapter import (
     PrestaShopWebServiceImage
 )
-from openerp.addons.connector_prestashop.backend import prestashop
 
-from openerp import models, fields
-from openerp.tools.translate import _
+from odoo.addons.connector.components.mapper import mapping
+from odoo.addons.component.core import Component
+from odoo.tools.translate import _
 
 import os
 import os.path
 
 
-class ProductImage(models.Model):
-    _inherit = 'base_multi_image.image'
-
-    front_image = fields.Boolean(string='Front image')
-
-
-@prestashop
-class ProductImageExport(PrestashopExporter):
-    _model_name = 'prestashop.product.image'
+class ProductImageExporter(Component):
+    _name = 'prestashop.product.image.exporter'
+    _inherit = 'prestashop.exporter'
+    _apply_on = 'prestashop.product.image'
 
     def _run(self, fields=None):
         """ Flow of the synchronization, implemented in inherited classes"""
@@ -77,9 +66,10 @@ class ProductImageExport(PrestashopExporter):
             })
 
 
-@prestashop
-class ProductImageExportMapper(PrestashopExportMapper):
-    _model_name = 'prestashop.product.image'
+class ProductImageExportMapper(Component):
+    _name = 'prestashop.product.image.mapper'
+    _inherit = 'prestashop.export.mapper'
+    _apply_on = 'prestashop.product.image'
 
     direct = [
         ('name', 'name'),
@@ -107,6 +97,15 @@ class ProductImageExportMapper(PrestashopExportMapper):
             elif storage == 'file':
                 file_name = os.path.splitext(
                     os.path.basename(record.odoo_id.path))
+            elif storage == 'filestore':
+                mimetype = record.odoo_id.attachment_id.mimetype
+                if '/' in mimetype:
+                    ext = mimetype.split('/')[-1]
+                else:
+                    ext = mimetype
+                if ext == 'jpeg':
+                    ext = 'jpg'
+                file_name = [record.odoo_id.attachment_id.res_name, ext]
         return file_name
 
     @mapping
@@ -124,7 +123,7 @@ class ProductImageExportMapper(PrestashopExportMapper):
             product_tmpl = record.env['product.template'].browse(
                 record.odoo_id.owner_id)
         binder = self.binder_for('prestashop.product.template')
-        ps_product_id = binder.to_backend(product_tmpl, wrap=True)
+        ps_product_id = binder.to_external(product_tmpl, wrap=True)
         return {'id_product': ps_product_id}
 
     @mapping
