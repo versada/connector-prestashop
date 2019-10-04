@@ -127,6 +127,8 @@ class PrestashopProductTemplate(models.Model):
         ('2', 'Default prestashop')],
         string='If stock shortage'
     )
+    low_stock_threshold = fields.Integer(string='Low Stock Threshold')
+    low_stock_alert = fields.Boolean(string='Low Stock Alert')
 
     @api.multi
     def recompute_prestashop_qty(self):
