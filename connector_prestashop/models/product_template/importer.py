@@ -51,6 +51,8 @@ class TemplateMapper(Component):
         ('reference', 'reference'),
         ('available_for_order', 'available_for_order'),
         ('on_sale', 'on_sale'),
+        ('low_stock_threshold', 'low_stock_threshold'),
+        ('low_stock_alert', 'low_stock_alert'),
     ]
 
     def _apply_taxes(self, tax, price):
