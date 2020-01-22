@@ -50,9 +50,19 @@ class ProductTemplate(models.Model):
             template.mapped('prestashop_bind_ids').recompute_prestashop_qty()
             # Recompute variant PrestaShop qty
             template.mapped(
-                'product_variant_ids.prestashop_combination_bind_ids'
+                'product_variant_ids.prestashop_combinations_bind_ids'
             ).recompute_prestashop_qty()
         return True
+
+    @api.multi
+    def _set_multi_image_main_medium(self):
+        super(ProductTemplate, self.with_context(connector_no_export=True)
+              )._set_multi_image_main_medium()
+
+    @api.multi
+    def _set_multi_image_main_small(self):
+        super(ProductTemplate, self.with_context(connector_no_export=True)
+              )._set_multi_image_main_small()
 
 
 class PrestashopProductTemplate(models.Model):
@@ -125,6 +135,8 @@ class PrestashopProductTemplate(models.Model):
         ('2', 'Default prestashop')],
         string='If stock shortage'
     )
+    low_stock_threshold = fields.Integer(string='Low Stock Threshold')
+    low_stock_alert = fields.Boolean(string='Low Stock Alert')
 
     @api.multi
     def recompute_prestashop_qty(self):
@@ -268,7 +280,8 @@ class PrestashopProductQuantityListener(Component):
     _apply_on = ['prestashop.product.combination',
                  'prestashop.product.template']
 
-    def _get_inventory_fields(self):
+    @staticmethod
+    def _get_inventory_fields():
         # fields which should not trigger an export of the products
         # but an export of their inventory
         return ('quantity', 'out_of_stock')
