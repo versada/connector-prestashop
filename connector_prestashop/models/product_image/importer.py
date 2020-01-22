@@ -5,7 +5,6 @@
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping
 
-import mimetypes
 import logging
 
 from odoo import _
@@ -41,7 +40,7 @@ class ProductImageMapper(Component):
 
     @mapping
     def extension(self, record):
-        return {'extension': mimetypes.guess_extension(record['type'])}
+        return {'extension': '.jpg'}
 
     @mapping
     def image_url(self, record):
