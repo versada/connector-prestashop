@@ -9,6 +9,7 @@ from odoo.addons import decimal_precision as dp
 from odoo.addons.queue_job.job import job
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
+from odoo.addons.queue_job.exception import FailedJobError
 
 import logging
 
@@ -39,6 +40,7 @@ class ProductTemplate(models.Model):
     @api.depends(
         'product_variant_ids',
         'product_variant_ids.stock_quant_ids',
+        'product_variant_ids.stock_move_ids',
     )
     def _compute_quantities(self):
         return super(ProductTemplate, self)._compute_quantities()
@@ -166,7 +168,7 @@ class PrestashopProductTemplate(models.Model):
 
     @api.multi
     def _prestashop_qty(self):
-        return self.qty_available
+        return self[self.backend_id.quantity_field]
 
     @job(default_channel='root.prestashop')
     def import_products(self, backend, since_date=None, **kwargs):
@@ -242,6 +244,8 @@ class ProductInventoryAdapter(Component):
         if client is None:
             client = self.client
         response = client.search(self._prestashop_model, filters)
+        if not response:
+            raise FailedJobError('No stock found for product')
         for stock_id in response:
             res = client.get(self._prestashop_model, stock_id)
             first_key = res.keys()[0]
