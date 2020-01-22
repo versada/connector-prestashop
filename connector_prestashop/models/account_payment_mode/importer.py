@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+from odoo import _
 from odoo.addons.component.core import Component
+from odoo.addons.queue_job.exception import FailedJobError
 
 
 class PaymentModeBatchImporter(Component):
@@ -34,13 +36,18 @@ class PaymentModeBatchImporter(Component):
              ('company_id', '=', self.backend_record.company_id.id),
              ],
         )
-        if len(journals) != 1:
-            return
+        if not journals:
+            raise FailedJobError(_(
+                "Missing account journal with type 'Bank'.\n"
+                "Resolution:\n"
+                "- Go to 'Invoicing > Configuration > Accounting > Journals'\n"
+                "- Create a new Journal with type 'Bank'\n"
+            ))
         mode = self.model.create({
             'name': record['payment'],
             'company_id': self.backend_record.company_id.id,
             'bank_account_link': 'fixed',
-            'fixed_journal_id': journals.id,
+            'fixed_journal_id': journals[:1].id,
             'payment_method_id': payment_method.id
         })
         self.backend_record.add_checkpoint(mode, message=None)
