@@ -10,21 +10,12 @@ class PrestashopBackend(models.Model):
     @property
     def _server_env_fields(self):
         base_fields = super()._server_env_fields
-<<<<<<< HEAD
         presta_fields = {
             "location": {},
             "webservice_key": {},
         }
         presta_fields.update(base_fields)
         return presta_fields
-=======
-        mail_fields = {
-            "location": {},
-            "webservice_key": {},
-        }
-        mail_fields.update(base_fields)
-        return mail_fields
->>>>>>> Add connector_prestashop_environment
 
     @api.model
     def _server_env_global_section_name(self):
