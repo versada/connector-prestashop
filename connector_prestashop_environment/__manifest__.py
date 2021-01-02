@@ -5,6 +5,10 @@
     "version": "14.0.1.0.0",
     "author": "akretion,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/connector-prestashop",
+<<<<<<< HEAD
+=======
+    "development_status": "Production/Stable",
+>>>>>>> Add connector_prestashop_environment
     "category": "Connector",
     "depends": ["connector_prestashop", "server_environment"],
     "license": "AGPL-3",
