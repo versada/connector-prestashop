@@ -1,6 +1,8 @@
 # © 2018 PlanetaTIC
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+from odoo.tests import tagged
+
 from odoo.addons.connector_prestashop.tests.common import (
     assert_no_job_delayed,
     recorder,
@@ -10,6 +12,7 @@ from ..models.product_template.exporter import get_slug
 from .common import CatalogManagerTransactionCase
 
 
+@tagged("post_install", "-at_install")
 class TestExportProduct(CatalogManagerTransactionCase):
     def setUp(self):
         super().setUp()
@@ -96,7 +99,7 @@ class TestExportProduct(CatalogManagerTransactionCase):
         ).with_context(connector_no_export=False)
 
     @assert_no_job_delayed
-    def test_export_product_template_wizard_export(self):
+    def test_01_export_product_template_wizard_export(self):
         # export from wizard
         wizard = (
             self.env["export.multiple.products"]
@@ -117,7 +120,7 @@ class TestExportProduct(CatalogManagerTransactionCase):
         )
 
     @assert_no_job_delayed
-    def test_export_product_template_wizard_active(self):
+    def test_02_export_product_template_wizard_active(self):
         # bind template
         self._bind_template()
         # check no export delayed
@@ -156,7 +159,7 @@ class TestExportProduct(CatalogManagerTransactionCase):
         self.assertEqual(4, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_template_wizard_resync(self):
+    def test_03_export_product_template_wizard_resync(self):
         # bind template
         self._bind_template()
         # resync from wizard
@@ -172,7 +175,7 @@ class TestExportProduct(CatalogManagerTransactionCase):
         )
 
     @assert_no_job_delayed
-    def test_export_product_template_onwrite(self):
+    def test_04_export_product_template_onwrite(self):
         # bind template
         binding = self._bind_template()
         # check no export delayed
@@ -187,7 +190,7 @@ class TestExportProduct(CatalogManagerTransactionCase):
         self.assertEqual(2, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_template_job(self):
+    def test_05_export_product_template_job(self):
         # create binding
         binding = self.env["prestashop.product.template"].create(
             {

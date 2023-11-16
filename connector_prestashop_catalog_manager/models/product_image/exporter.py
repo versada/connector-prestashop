@@ -1,7 +1,5 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import os
-import os.path
 
 from odoo.tools.translate import _
 
@@ -67,12 +65,10 @@ class ProductImageExporter(Component):
                 "type": "image/jpeg",
             }
         )
-        if self.binding.url != full_public_url:
+        if self.binding.load_from != full_public_url:
             self.binding.with_context(connector_no_export=True).write(
                 {
-                    "url": full_public_url,
-                    "file_db_store": False,
-                    "storage": "url",
+                    "load_from": full_public_url,
                 }
             )
 
@@ -85,46 +81,6 @@ class ProductImageExportMapper(Component):
     direct = [
         ("name", "name"),
     ]
-
-    def _get_file_name(self, record):
-        """
-        Get file name with extension from depending storage.
-        :param record: browse record
-        :return: string: file name.extension.
-        """
-        file_name = record.odoo_id.filename
-        if not file_name:
-            storage = record.odoo_id.storage
-            if storage == "url":
-                file_name = os.path.splitext(os.path.basename(record.odoo_id.url))
-            elif storage == "db":
-                if not record.odoo_id.filename:
-                    file_name = "{}_{}.jpg".format(
-                        record.odoo_id.owner_model,
-                        record.odoo_id.owner_id,
-                    )
-                file_name = os.path.splitext(
-                    os.path.basename(record.odoo_id.filename or file_name)
-                )
-            elif storage == "file":
-                file_name = os.path.splitext(os.path.basename(record.odoo_id.path))
-            elif storage == "filestore":
-                mimetype = record.odoo_id.attachment_id.mimetype
-                if "/" in mimetype:
-                    ext = mimetype.split("/")[-1]
-                else:
-                    ext = mimetype
-                if ext == "jpeg":
-                    ext = "jpg"
-                file_name = [record.odoo_id.attachment_id.res_name, ext]
-        return file_name
-
-    @mapping
-    def source_image(self, record):
-        content = getattr(
-            record.odoo_id, "_get_image_from_%s" % record.odoo_id.storage
-        )()
-        return {"content": content}
 
     @mapping
     def product_id(self, record):
@@ -143,20 +99,13 @@ class ProductImageExportMapper(Component):
         return {"id_product": ps_product_id}
 
     @mapping
-    def extension(self, record):
-        return {"extension": self._get_file_name(record)[1]}
-
-    @mapping
     def legend(self, record):
         return {"legend": record.name}
 
     @mapping
-    def filename(self, record):
-        file_name = record.filename
-        if not file_name:
-            name_tuple = self._get_file_name(record)
-            if name_tuple[1].startswith("."):
-                file_name = "".join(name_tuple)
-            else:
-                file_name = ".".join(name_tuple)
-        return {"filename": file_name}
+    def load_from(self, record):
+        return {"load_from": record.load_from}
+
+    @mapping
+    def image_1920(self, record):
+        return {"image_1920": record.image_1920}

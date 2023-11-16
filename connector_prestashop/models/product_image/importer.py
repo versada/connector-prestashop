@@ -2,7 +2,6 @@
 
 
 import logging
-import mimetypes
 
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping
@@ -37,25 +36,16 @@ class ProductImageMapper(Component):
         return {"backend_id": self.backend_record.id}
 
     @mapping
-    def extension(self, record):
-        return {"extension": mimetypes.guess_extension(record["type"])}
-
-    @mapping
-    def image_url(self, record):
-        return {"url": record["full_public_url"]}
-
-    @mapping
-    def filename(self, record):
-        return {"filename": "%s.jpg" % record["id_image"]}
-
-    @mapping
-    def storage(self, record):
-        return {"storage": "url"}
-        # return {'storage': 'db'}
+    def load_from(self, record):
+        return {"load_from": record["full_public_url"]}
 
     @mapping
     def owner_model(self, record):
         return {"owner_model": "product.template"}
+
+    @mapping
+    def image_1920(self, record):
+        return {"image_1920": record["content"]}
 
 
 class ProductImageImporter(Component):
@@ -88,4 +78,4 @@ class ProductImageImporter(Component):
             return
         self.binder_for("prestashop.product.image")
         image = binder.to_internal(image_id, unwrap=True)
-        product_tmpl.image_1920 = image.image_main
+        product_tmpl.image_1920 = image.image_1920

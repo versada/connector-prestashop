@@ -1,11 +1,15 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import logging
 import re
 import unicodedata
 from functools import reduce
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
+
 
 try:
     import slugify as slugify_lib
@@ -17,8 +21,8 @@ def get_slug(name):
     if slugify_lib:
         try:
             return slugify_lib.slugify(name)
-        except TypeError:
-            pass
+        except TypeError as e:
+            _logger.info("get_slug TypeError: %s", e)
     uni = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
     slug = re.sub(r"[\W_]", " ", uni).strip().lower()
     slug = re.sub(r"[-\s]+", "-", slug)

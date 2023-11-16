@@ -5,9 +5,9 @@
         <field name="model">base_multi_image.image</field>
         <field name="inherit_id" ref="base_multi_image.image_form_view" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='extension']" position="after">
+            <field name="sequence" position="after">
                 <field name="front_image" />
-            </xpath>
+            </field>
         </field>
     </record>
 </odoo>

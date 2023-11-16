@@ -39,7 +39,7 @@ class ProductCombinationExporter(Component):
                         .id
                     )
                     image_content = getattr(
-                        image_line, "_get_image_from_%s" % image_line.storage
+                        image_line, "_get_image_from_%s" % image_line.load_from
                     )()
                     image_ext.export_record(image_content)
 
@@ -101,7 +101,7 @@ class ProductCombinationExporter(Component):
         # self._export_images()
 
     def update_quantities(self):
-        self.binding.odoo_id.with_context(self.env.context).update_prestashop_qty()
+        self.binding.odoo_id.with_context(**self.env.context).update_prestashop_qty()
 
     def _after_export(self):
         self.update_quantities()
@@ -141,13 +141,11 @@ class ProductCombinationExportMapper(Component):
     def _unit_price_impact(self, record):
         pricelist = record.backend_id.pricelist_id
         if pricelist:
-            tmpl_prices = pricelist.get_products_price(
-                [record.odoo_id.product_tmpl_id], [1.0], [None]
+            tmpl_prices = pricelist._get_products_price(
+                record.odoo_id.product_tmpl_id, 1.0
             )
             tmpl_price = tmpl_prices.get(record.odoo_id.product_tmpl_id.id)
-            product_prices = pricelist.get_products_price(
-                [record.odoo_id], [1.0], [None]
-            )
+            product_prices = pricelist._get_products_price(record.odoo_id, 1.0)
             product_price = product_prices.get(record.odoo_id.id)
             extra_to_export = product_price - tmpl_price
         else:

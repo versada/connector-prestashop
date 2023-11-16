@@ -1,5 +1,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import logging
 import re
 import unicodedata
 from datetime import timedelta
@@ -15,13 +16,15 @@ try:
 except ImportError:
     slugify_lib = None
 
+_logger = logging.getLogger(__name__)
+
 
 def get_slug(name):
     if slugify_lib:
         try:
             return slugify_lib.slugify(name)
-        except TypeError:
-            pass
+        except TypeError as e:
+            _logger.info("get_slug TypeError: %s", e)
     uni = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
     slug = re.sub(r"[\W_]", " ", uni).strip().lower()
     slug = re.sub(r"[-\s]+", "-", slug)
@@ -104,14 +107,12 @@ class ProductTemplateExporter(Component):
 
     def _export_dependencies(self):
         """Export the dependencies for the product"""
-        super()._export_dependencies()
+        res = super()._export_dependencies()
         attribute_binder = self.binder_for("prestashop.product.combination.option")
         option_binder = self.binder_for("prestashop.product.combination.option.value")
 
         for category in self.binding.categ_ids:
             self.export_categories(category)
-
-        self.export_brand(self.binding.product_brand_id)
 
         for line in self.binding.attribute_line_ids:
             attribute_ext_id = attribute_binder.to_external(
@@ -127,6 +128,7 @@ class ProductTemplateExporter(Component):
                     self._export_dependency(
                         value, "prestashop.product.combination.option.value"
                     )
+        return res
 
     def export_variants(self):
         combination_obj = self.env["prestashop.product.combination"]
@@ -229,10 +231,6 @@ class ProductTemplateExportMapper(Component):
         ("state", "state"),
         ("low_stock_threshold", "low_stock_threshold"),
         ("default_code", "reference"),
-        (
-            m2o_to_external("product_brand_id", binding="prestashop.product.brand"),
-            "id_manufacturer",
-        ),
         ("visibility", "visibility"),
     ]
     # handled by base mapping `translatable_fields`
@@ -258,7 +256,7 @@ class ProductTemplateExportMapper(Component):
         tax = record.taxes_id
         pricelist = record.backend_id.pricelist_id
         if pricelist:
-            prices = pricelist.get_products_price([record.odoo_id], [1.0], [None])
+            prices = pricelist._get_products_price(record.odoo_id, 1.0)
             price_to_export = prices.get(record.odoo_id.id)
         else:
             price_to_export = record.list_price

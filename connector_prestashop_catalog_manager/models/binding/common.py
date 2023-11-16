@@ -9,8 +9,7 @@ class PrestashopBinding(models.AbstractModel):
 
     @api.model
     def create(self, vals):
-        ctx = self.env.context.copy()
-        ctx["catalog_manager_ignore_translation"] = True
-        res = super(PrestashopBinding, self.with_context(ctx)).create(vals)
-
-        return res
+        return super(
+            PrestashopBinding,
+            self.with_context(catalog_manager_ignore_translation=True),
+        ).create(vals)

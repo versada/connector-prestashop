@@ -1,5 +1,6 @@
 # © 2018 PlanetaTIC
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+from odoo.tests import tagged
 
 from odoo.addons.connector_prestashop.tests.common import (
     assert_no_job_delayed,
@@ -9,6 +10,7 @@ from odoo.addons.connector_prestashop.tests.common import (
 from .common import CatalogManagerTransactionCase
 
 
+@tagged("post_install", "-at_install")
 class TestExportProductAttribute(CatalogManagerTransactionCase):
     def setUp(self):
         super().setUp()
@@ -47,7 +49,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
         ).with_context(connector_no_export=False)
 
     @assert_no_job_delayed
-    def test_export_product_attribute_onbind(self):
+    def test_01_export_product_attribute_onbind(self):
         # create attribute binding
         self.env["prestashop.product.combination.option"].create(
             {
@@ -59,7 +61,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
         self.assertEqual(1, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_attribute_value_onbind(self):
+    def test_02_export_product_attribute_value_onbind(self):
         # bind attribute
         self._bind_attribute()
         # create value binding
@@ -73,7 +75,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
         self.assertEqual(1, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_attribute_onwrite(self):
+    def test_03_export_product_attribute_onwrite(self):
         # bind attribute
         self._bind_attribute()
         # check no export delayed
@@ -91,7 +93,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
         self.assertEqual(2, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_attribute_value_onwrite(self):
+    def test_04_export_product_attribute_value_onwrite(self):
         # bind attribute and value
         self._bind_attribute()
         binding = self._bind_value()
@@ -107,7 +109,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
         self.assertEqual(2, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_attribute_job(self):
+    def test_05_export_product_attribute_job(self):
         # create attribute binding
         binding = self.env["prestashop.product.combination.option"].create(
             {
@@ -150,7 +152,7 @@ class TestExportProductAttribute(CatalogManagerTransactionCase):
                 self.assertEqual(value, ps_option[field]["language"]["value"])
 
     @assert_no_job_delayed
-    def test_export_product_attribute_value_job(self):
+    def test_06_export_product_attribute_value_job(self):
         # create value binding
         binding = self.env["prestashop.product.combination.option.value"].create(
             {

@@ -1,7 +1,6 @@
 # © 2018 PlanetaTIC
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-
-from odoo.modules.module import get_resource_path
+from odoo.tests import tagged
 
 from odoo.addons.connector_prestashop.tests.common import (
     assert_no_job_delayed,
@@ -11,6 +10,7 @@ from odoo.addons.connector_prestashop.tests.common import (
 from .common import CatalogManagerTransactionCase
 
 
+@tagged("post_install", "-at_install")
 class TestExportProductImage(CatalogManagerTransactionCase):
     def setUp(self):
         super().setUp()
@@ -30,44 +30,42 @@ class TestExportProductImage(CatalogManagerTransactionCase):
                 "link_rewrite": "faded-short-sleaves-t-shirt",
             }
         )
-
+        self.transparent_image = (  # 1x1 Transparent GIF
+            b"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        )
+        self.grey_image = (  # 1x1 Grey GIF
+            b"R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw =="
+        )
         # create image and binding
         self.image = self.env["base_multi_image.image"].create(
             {
                 "owner_id": template.id,
                 "owner_model": "product.template",
-                "storage": "file",
-                "path": get_resource_path(
-                    "connector_prestashop", "static", "description", "icon.png"
-                ),
+                "image_1920": self.transparent_image,
             }
         )
+        self.image._onchange_load_from()
         self.binding = self.create_binding_no_export(
             "prestashop.product.image", self.image.id, None
         )
 
     @assert_no_job_delayed
-    def test_export_product_image_onwrite(self):
+    def test_01_export_product_image_onwrite(self):
         # write in image
         self.image.write(
             {
-                "path": get_resource_path(
-                    "connector_prestashop_catalog_manager",
-                    "static",
-                    "description",
-                    "icon.png",
-                ),
+                "image_1920": self.grey_image,
             }
         )
         # check export delayed
         self.instance_delay_record.export_record.assert_called_once_with(
             fields=[
-                "path",
+                "load_from",
             ]
         )
 
     @assert_no_job_delayed
-    def test_export_product_image_ondelete(self):
+    def test_02_export_product_image_ondelete(self):
         # bind image
         self.binding.prestashop_id = 24
 
@@ -79,7 +77,7 @@ class TestExportProductImage(CatalogManagerTransactionCase):
         )
 
     @assert_no_job_delayed
-    def test_export_product_image_jobs(self):
+    def test_03_export_product_image_jobs(self):
         with recorder.use_cassette(
             "test_export_product_image", cassette_library_dir=self.cassette_library_dir
         ) as cassette:
@@ -118,19 +116,11 @@ class TestExportProductImage(CatalogManagerTransactionCase):
             #             self.assertDictEqual({}, self.parse_qs(request.uri))
 
             # ...and delete test is hacked
-            self.image.write(
-                {
-                    "storage": "file",
-                    "path": get_resource_path(
-                        "connector_prestashop", "static", "description", "icon.png"
-                    ),
-                }
-            )
+
+            self.image.write({"image_1920": self.grey_image})
 
             # delete image in PS
-            attributes = {
-                "id_product": 1,
-            }
+            attributes = {"id_product": 1}
             self.env["prestashop.product.image"].export_delete_record(
                 self.backend_record,
                 self.binding.prestashop_id,

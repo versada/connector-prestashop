@@ -3,6 +3,8 @@
 
 from unittest import mock
 
+from odoo.tests import tagged
+
 from odoo.addons.connector_prestashop.tests.common import (
     assert_no_job_delayed,
     recorder,
@@ -11,6 +13,7 @@ from odoo.addons.connector_prestashop.tests.common import (
 from .common import CatalogManagerTransactionCase
 
 
+@tagged("post_install", "-at_install")
 class TestExportProductProduct(CatalogManagerTransactionCase):
     def setUp(self):
         super().setUp()
@@ -116,7 +119,7 @@ class TestExportProductProduct(CatalogManagerTransactionCase):
             },
         ).with_context(connector_no_export=False)
 
-    def test_export_product_product_oncreate(self):
+    def test_01_export_product_product_oncreate(self):
         # create binding
         self.env["prestashop.product.combination"].create(
             {
@@ -131,7 +134,7 @@ class TestExportProductProduct(CatalogManagerTransactionCase):
             fields=["backend_id", "odoo_id", "main_template_id"]
         )
 
-    def test_export_product_product_onwrite(self):
+    def test_02_export_product_product_onwrite(self):
         # reset mock:
         self.patch_delay_record.stop()
         mock_delay_record = mock.MagicMock()
@@ -156,7 +159,7 @@ class TestExportProductProduct(CatalogManagerTransactionCase):
         self.assertEqual(2, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_product_ondelete(self):
+    def test_03_export_product_product_ondelete(self):
         # bind product
         binding = self._bind_product()
         binding.prestashop_id = 46
@@ -171,7 +174,7 @@ class TestExportProductProduct(CatalogManagerTransactionCase):
         assert self.instance_delay_record.export_delete_record.call_count == 2
 
     @assert_no_job_delayed
-    def test_export_product_product_jobs(self):
+    def test_04_export_product_product_jobs(self):
         # bind product
         binding = self._bind_product()
 

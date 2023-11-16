@@ -6,4 +6,6 @@ from . import product_category
 from . import product_product
 from . import product_template
 from . import product_image
-from . import ir_translation
+
+# TODO: check after testing as it.translation does not exist in v16.
+# from . import ir_translation

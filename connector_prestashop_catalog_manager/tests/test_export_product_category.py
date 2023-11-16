@@ -1,5 +1,6 @@
 # © 2018 PlanetaTIC
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+from odoo.tests import tagged
 
 from odoo.addons.connector_prestashop.tests.common import (
     assert_no_job_delayed,
@@ -10,6 +11,7 @@ from ..models.product_template.exporter import get_slug
 from .common import CatalogManagerTransactionCase
 
 
+@tagged("post_install", "-at_install")
 class TestExportProductCategory(CatalogManagerTransactionCase):
     def setUp(self):
         super().setUp()
@@ -32,7 +34,7 @@ class TestExportProductCategory(CatalogManagerTransactionCase):
         ).with_context(connector_no_export=False)
 
     @assert_no_job_delayed
-    def test_export_product_category_wizard(self):
+    def test_01_export_product_category_wizard(self):
         # export from wizard
         wizard = (
             self.env["wiz.prestashop.export.category"]
@@ -54,7 +56,7 @@ class TestExportProductCategory(CatalogManagerTransactionCase):
         )
 
     @assert_no_job_delayed
-    def test_export_product_category_onwrite(self):
+    def test_02_export_product_category_onwrite(self):
         # bind category
         binding = self._bind_category()
         # check no export delayed
@@ -70,7 +72,7 @@ class TestExportProductCategory(CatalogManagerTransactionCase):
         self.assertEqual(2, self.instance_delay_record.export_record.call_count)
 
     @assert_no_job_delayed
-    def test_export_product_category_job(self):
+    def test_03_export_product_category_job(self):
         # create binding
         binding = self.env["prestashop.product.category"].create(
             {
