@@ -76,8 +76,8 @@ class ProductImageAdapter(Component):
             files=[
                 (
                     "image",
-                    attributes["filename"],
-                    base64.b64decode(attributes["content"]),
+                    f"{attributes['name']}.jpg",
+                    base64.b64decode(attributes["image_1920"]),
                 )
             ],
         )
@@ -98,8 +98,8 @@ class ProductImageAdapter(Component):
             files=[
                 (
                     "image",
-                    attributes["filename"],
-                    base64.b64decode(attributes["content"]),
+                    f"{attributes['name']}.jpg",
+                    base64.b64decode(attributes["image_1920"]),
                 )
             ],
         )
