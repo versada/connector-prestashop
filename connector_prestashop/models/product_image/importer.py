@@ -76,6 +76,6 @@ class ProductImageImporter(Component):
         # )
         if str(product_tmpl.default_image_id) != str(image_id):
             return
-        self.binder_for("prestashop.product.image")
+        binder = self.binder_for("prestashop.product.image")
         image = binder.to_internal(image_id, unwrap=True)
         product_tmpl.image_1920 = image.image_1920
