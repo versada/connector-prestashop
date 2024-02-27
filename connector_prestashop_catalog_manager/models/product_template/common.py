@@ -111,11 +111,6 @@ class TemplateAdapter(Component):
         full_attributes = prestashop_data["product"].copy()
         fa_assoc = full_attributes["associations"]
         for field in attributes:
-            # TODO: check error with wholesale_price
-            # https://www.prestashop.com/forums/topic/716879-solved-
-            # import-failing-on-product-wholesale_price-is-not-valid/
-            if field == "wholesale_price":
-                continue
             if field != "associations":
                 full_attributes[field] = attributes[field]
                 continue

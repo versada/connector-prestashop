@@ -213,7 +213,6 @@ class ProductTemplateExportMapper(Component):
         ("show_price", "show_price"),
         ("online_only", "online_only"),
         ("weight", "weight"),
-        ("standard_price", "wholesale_price"),
         (m2o_to_external("default_shop_id"), "id_shop_default"),
         ("always_available", "active"),
         ("barcode", "barcode"),
@@ -267,6 +266,12 @@ class ProductTemplateExportMapper(Component):
             return {"price": str(round(price_to_export / self._get_factor_tax(tax), 6))}
         else:
             return {"price": str(price_to_export)}
+
+    @changed_by("standard_price")
+    @mapping
+    def cost_price(self, record):
+        wholesale_price = float(f"{record.standard_price:.2f}")
+        return {"wholesale_price": wholesale_price}
 
     def _get_product_category(self, record):
         ext_categ_ids = []
