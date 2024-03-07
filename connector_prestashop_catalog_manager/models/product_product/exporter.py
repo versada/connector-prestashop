@@ -151,13 +151,14 @@ class ProductCombinationExportMapper(Component):
         else:
             extra_to_export = record.impact_price
         tax = record.taxes_id[:1]
+        # 6 is the rounding precision used by PrestaShop for the
+        # tax excluded price.
         if tax.price_include and tax.amount_type == "percent":
-            # 6 is the rounding precision used by PrestaShop for the
-            # tax excluded price.  we can get back a 2 digits tax included
-            # price from the 6 digits rounded value
+            # we can get back a 2 digits tax included price
+            # from the 6 digits rounded value
             return {"price": round(extra_to_export / self._get_factor_tax(tax), 6)}
         else:
-            return {"price": extra_to_export}
+            return {"price": round(extra_to_export, 6)}
 
     @changed_by("standard_price")
     @mapping
