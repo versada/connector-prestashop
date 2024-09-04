@@ -4,6 +4,7 @@ import base64
 import logging
 from contextlib import contextmanager
 
+from dicttoxml import dicttoxml
 from prestapyt import PrestaShopWebServiceDict, PrestaShopWebServiceError
 from requests.exceptions import (
     ConnectionError as ConnError,
@@ -230,7 +231,12 @@ class GenericAdapter(AbstractComponent):
             str(attributes),
         )
         res = self.client.add(
-            self._prestashop_model, {self._export_node_name: attributes}
+            self._prestashop_model,
+            dicttoxml(
+                {self._export_node_name: attributes},
+                custom_root="prestashop",
+                attr_type=False,
+            ),
         )
         if self._export_node_name_res:
             return res["prestashop"][self._export_node_name_res]["id"]
