@@ -33,7 +33,7 @@ If you want to export from Odoo to PrestaShop changes made on the products,
 product categories or product images, you need to install
 *connector_prestashop_catalog_manager* module in this same repository.
 
-This connector supports PrestaShop version up to 1.6.11. Maybe later versions
+This connector supports PrestaShop version up to 1.7.x.0. Maybe later versions
 are also supported, but they haven't been tested. It uses the webservices of
 PrestaShop.
 

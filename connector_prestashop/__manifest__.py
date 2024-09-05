@@ -19,6 +19,7 @@
             "freezegun",
             "vcrpy",
             "bs4",
+            "dicttoxml",
         ],
     },
     "author": "Akretion,"
