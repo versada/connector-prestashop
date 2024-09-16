@@ -413,11 +413,14 @@ class TranslatableRecordImporter(AbstractComponent):
             if not isinstance(record[field]["language"], list):
                 record[field]["language"] = [record[field]["language"]]
             for language in record[field]["language"]:
-                if not language or language["attrs"]["id"] in languages:
+                language_id = (
+                    "@id" in language and language["@id"] or language["attrs"]["id"]
+                )
+                if not language or language_id in languages:
                     continue
-                erp_lang = self._get_odoo_language(language["attrs"]["id"])
+                erp_lang = self._get_odoo_language(language_id)
                 if erp_lang:
-                    languages[language["attrs"]["id"]] = erp_lang.code
+                    languages[language_id] = erp_lang.code
         return languages
 
     def _split_per_language(self, record, fields=None):
@@ -450,7 +453,9 @@ class TranslatableRecordImporter(AbstractComponent):
             _fields = [x for x in _fields if x in fields]
         for field in _fields:
             for language in record[field]["language"]:
-                current_id = language["attrs"]["id"]
+                current_id = (
+                    "@id" in language and language["@id"] or language["attrs"]["id"]
+                )
                 code = languages.get(current_id)
                 if not code and self._mandatory_translation:
                     # TODO: be nicer here.
@@ -468,7 +473,11 @@ class TranslatableRecordImporter(AbstractComponent):
                     )
                 elif not code:
                     continue
-                split_record[code][field] = language["value"]
+                if "#text" in language:
+                    language_value = language["#text"]
+                else:
+                    language_value = language["value"]
+                split_record[code][field] = language_value
         return split_record
 
     def _create_context(self):
