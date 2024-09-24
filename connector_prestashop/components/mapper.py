@@ -88,8 +88,8 @@ class TranslationPrestashopExportMapper(AbstractComponent):
             for language_id, record in records_by_language.items():
                 value["language"].append(
                     {
-                        "@id": str(language_id),
-                        "#text": record[from_attr] or "",
+                        "attrs": {"id": str(language_id)},
+                        "value": record[from_attr] or "",
                     }
                 )
             res[to_attr] = value

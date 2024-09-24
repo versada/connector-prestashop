@@ -413,14 +413,11 @@ class TranslatableRecordImporter(AbstractComponent):
             if not isinstance(record[field]["language"], list):
                 record[field]["language"] = [record[field]["language"]]
             for language in record[field]["language"]:
-                language_id = (
-                    "@id" in language and language["@id"] or language["attrs"]["id"]
-                )
-                if not language or language_id in languages:
+                if not language or language["attrs"]["id"] in languages:
                     continue
-                erp_lang = self._get_odoo_language(language_id)
+                erp_lang = self._get_odoo_language(language["attrs"]["id"])
                 if erp_lang:
-                    languages[language_id] = erp_lang.code
+                    languages[language["attrs"]["id"]] = erp_lang.code
         return languages
 
     def _split_per_language(self, record, fields=None):

@@ -4,7 +4,6 @@ import base64
 import logging
 from contextlib import contextmanager
 
-import xmltodict
 from prestapyt import PrestaShopWebServiceDict, PrestaShopWebServiceError
 from requests.exceptions import (
     ConnectionError as ConnError,
@@ -231,8 +230,7 @@ class GenericAdapter(AbstractComponent):
             str(attributes),
         )
         res = self.client.add(
-            self._prestashop_model,
-            xmltodict.unparse({"prestashop": {self._export_node_name: attributes}}),
+            self._prestashop_model, {self._export_node_name: attributes}
         )
         if self._export_node_name_res:
             return res["prestashop"][self._export_node_name_res]["id"]
@@ -246,14 +244,9 @@ class GenericAdapter(AbstractComponent):
             self._prestashop_model,
             str(attributes),
         )
-        # It is required as prestapyt has an error when updating record with
-        # xml format passed in self.client.edit()
-        full_url = self.client._api_url + self._prestashop_model
-        content = xmltodict.unparse(
-            {"prestashop": {self._export_node_name: attributes}}
+        res = self.client.edit(
+            self._prestashop_model, {self._export_node_name: attributes}
         )
-        headers = {"Content-Type": "text/xml"}
-        res = self.client._execute(full_url, "PUT", data=content, add_headers=headers)
         if self._export_node_name_res:
             return res["prestashop"][self._export_node_name_res]["id"]
         return res
