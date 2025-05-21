@@ -125,7 +125,7 @@ class VersionKey17x0(Component):
     _usage = "prestashop.version.key.1.7.x.0"
 
     keys = {
-        "product_option_value": "product_option_value",
+        "product_option_value": "product_option_values",
         "category": "category",
         "image": "image",
         "order_slip": "order_slip",
